@@ -1,10 +1,11 @@
 #include "server.h"
+#include "parser.h"
 
 #include<sys/socket.h>
 #include<arpa/inet.h>
 #include<unistd.h>
 #include <cstring>
-
+#include <string>
 #include <iostream>
 using namespace std;
 void Server::start()
@@ -82,7 +83,7 @@ void Server::acceptClient()
     cout << "client connected!\n";
 
     receiveData();
-    
+
     close(client_fd);
 }
 
@@ -99,5 +100,27 @@ void Server::receiveData()
     }
 
     cout << "received " << bytes_received << "bytes\n";
-    cout << "message: " << buffer << '\n';
+    std::string command(buffer);
+
+    while(!command.empty() && (command.back() == '\r' || command.back() == '\n'))
+    {
+        command.pop_back();
+    }
+   
+    string response = parser.parse(command);
+
+    sendResponse(response + "\n");
+
+}
+
+void Server::sendResponse(const std::string& message)
+{
+    int bytes_sent = send(client_fd , message.c_str() , message.size(),0);
+
+    if(bytes_sent == -1)
+    {
+        cerr << "failed to send response\n";
+        return ;
+    }
+    cout << "sent " << bytes_sent << "bytes\n";
 }
