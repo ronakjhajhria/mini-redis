@@ -1,0 +1,16 @@
+# Build directory
+build/
+
+# Executable
+mini_redis
+
+# Object files
+*.o
+*.out
+*.exe
+
+# VS Code settings
+.vscode/
+
+# macOS files
+.DS_Store
