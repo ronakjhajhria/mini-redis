@@ -10,6 +10,15 @@ public:
 
     std::string get(const std::string& key);
 
+    bool del(const std::string& key);
+
+    bool exists(const std::string & key);
+
+    std::string keys();
+
+    void flushAll();
+    int size();
+
 private:
     std::unordered_map<std::string, std::string> store;
 };
