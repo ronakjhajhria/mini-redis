@@ -18,7 +18,6 @@ public:
 
 private:
     int server_fd;
-    int client_fd;
 
     Database database;
     Parser parser;
@@ -27,7 +26,7 @@ private:
     bool bindSocket();
     bool startListening();
 
-    void acceptClient();
+    void acceptClients();
     void receiveData();
 
     void sendResponse(const string& message);

@@ -16,3 +16,34 @@ string Database::get(const string& key)
 
     return it->second;
 }
+bool Database::del(const string& key)
+{
+    return store.erase(key) > 0;
+}
+bool Database::exists(const string& key)
+{
+    return store.find(key) != store.end();
+}
+string Database::keys()
+{
+    string result;
+    for(const auto& pair : store)
+    {
+        result += pair.first + "\n";
+    }
+    return result;
+}
+
+void Database::flushAll()
+{
+    store.clear();
+}
+int Database::size()
+{
+    return store.size();
+}
+
+const unordered_map<string, string>& Database::getStore() const
+{
+    return store;
+}

@@ -7,7 +7,15 @@
 #include <cstring>
 #include <string>
 #include <iostream>
+#include<sstream>
+#include<persistence.h>
 using namespace std;
+
+Server::Server()
+    : parser(database)
+{
+}
+
 void Server::start()
 {
     cout << "creating server socket\n";
@@ -21,7 +29,7 @@ void Server::start()
     }
 
     cout << "socket created successfully\n";
-
+    Persistence::load(database);
     if(!bindSocket())
     {
         close(server_fd);
@@ -33,8 +41,10 @@ void Server::start()
         close(server_fd);
         return ;
     }
-
-    acceptClient();
+    while(true)
+    {
+        acceptClients();
+    }
 
     close(server_fd);
 }
@@ -68,59 +78,25 @@ bool Server::startListening()
     return true;
 }
 
-void Server::acceptClient()
+void Server::acceptClients()
 {
     cout << "waiting for a client...\n";
-
-    client_fd = accept(server_fd , nullptr, nullptr);
-
-    if(client_fd == -1)
+    while (true)
     {
-        cerr << "failed to accept client\n";
-        return ;
+        int client_fd = accept(server_fd, nullptr, nullptr);
+
+        if (client_fd == -1)
+            continue;
+
+        std::thread t(
+            [this, client_fd]()
+            {
+                ClientHandler handler(client_fd, database);
+                handler.handle();
+            });
+
+        t.detach();
     }
-
-    cout << "client connected!\n";
-
-    receiveData();
-
-    close(client_fd);
 }
 
-void Server::receiveData()
-{
-    char buffer[1024] = {0};
 
-    int bytes_received = recv(client_fd, buffer , sizeof(buffer) -1 , 0);
-
-    if(bytes_received == -1)
-    {
-        cerr << "failed to receive data\n";
-        return;
-    }
-
-    cout << "received " << bytes_received << "bytes\n";
-    std::string command(buffer);
-
-    while(!command.empty() && (command.back() == '\r' || command.back() == '\n'))
-    {
-        command.pop_back();
-    }
-   
-    string response = parser.parse(command);
-
-    sendResponse(response + "\n");
-
-}
-
-void Server::sendResponse(const std::string& message)
-{
-    int bytes_sent = send(client_fd , message.c_str() , message.size(),0);
-
-    if(bytes_sent == -1)
-    {
-        cerr << "failed to send response\n";
-        return ;
-    }
-    cout << "sent " << bytes_sent << "bytes\n";
-}

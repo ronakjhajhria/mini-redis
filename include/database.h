@@ -2,13 +2,14 @@
 
 #include <string>
 #include <unordered_map>
-
+#include <mutex>
+using namespace std;
 class Database
 {
 public:
-    void set(const std::string& key, const std::string& value);
+    void set(const string& key, const string& value);
 
-    std::string get(const std::string& key);
+    string get(const std::string& key);
 
     bool del(const std::string& key);
 
@@ -18,6 +19,7 @@ public:
 
     void flushAll();
     int size();
+    const std::unordered_map<std::string, std::string>& getStore() const;
 
 private:
     std::unordered_map<std::string, std::string> store;
